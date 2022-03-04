@@ -1,6 +1,6 @@
 {
-  "name": "@thenerdyhick/ts-discord-bot",
-  "version": "1.0.0-alpha",
+  "name": "@nerdyhick/ts-discord-bot",
+  "version": "1.0.0-alpha1",
   "description": "Typescript implementation/classes for a discord slash-command bot",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "url": "ssh://git@gitlab.leoathome.com:2224/utilities/ts-discord-bot.git"
   },
   "author": "Leo Reading",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "@discordjs/builders": "^0.12.0",
     "@discordjs/collection": "^0.5.0",
