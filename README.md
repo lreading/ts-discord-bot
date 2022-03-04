@@ -2,8 +2,9 @@
 This library is an abstraction built on top of the [discord.js](https://github.com/discordjs/discord.js/) library.  It's meant to be used as a quick-start for new bots.
 
 ## Installation
-Install this package, alongside `discord.js`:
-`npm i -S @nerdyhick/ts-discord-bot discord.js`
+Install this package:
+
+`npm i -S @nerdyhick/ts-discord-bot`
 
 Familiarize yourself with how the Discord Bots work.  Discord.js has a [great guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html) on creating your bot in the Discord developer portal.
 
@@ -52,16 +53,16 @@ The BotClient class is responsible for creating the client and commands.  You ca
 If none are specified, the defaults are used.
 
 Default Intents:
-    - Intents.FLAGS.GUILDS,
-    - Intents.FLAGS.GUILD_MEMBERS,
-    - Intents.FLAGS.GUILD_MESSAGES
+- Intents.FLAGS.GUILDS,
+- Intents.FLAGS.GUILD_MEMBERS,
+- Intents.FLAGS.GUILD_MESSAGES
 
 Default Client Event Listeners:
-    - Error: Logs a message when there is an error in the client
-    - Ready: Logs a message when the client is ready
-    - GuildCreate: Logs a message when the bot joins a guild
-    - GuildDelete: Logs a message when the bot is removed or kicked from a build
-    - InteractionCeate: Delegates to the named command, see the commands section for creating commands
+- Error: Logs a message when there is an error in the client
+- Ready: Logs a message when the client is ready
+- GuildCreate: Logs a message when the bot joins a guild
+- GuildDelete: Logs a message when the bot is removed or kicked from a build
+- InteractionCeate: Delegates to the named command, see the commands section for creating commands
 
 ## Secrets
 
@@ -175,7 +176,6 @@ await client.addCommands(commands);
 ```
 
 # Licenses
-This is licensed under the MIT license.  Please see the [LICENSE.md](LICENSE.md)
-
-[discord.js is licensed under Apache v2](https://github.com/discordjs/discord.js/blob/main/packages/discord.js/LICENSE)
-[discord.js/builder is licensed under Apache v2](https://github.com/discordjs/discord.js/blob/main/packages/builders/LICENSE)
+- This is licensed under the MIT license.  Please see the [LICENSE.md](LICENSE.md)
+- [discord.js is licensed under Apache v2](https://github.com/discordjs/discord.js/blob/main/packages/discord.js/LICENSE)
+- [discord.js/builder is licensed under Apache v2](https://github.com/discordjs/discord.js/blob/main/packages/builders/LICENSE)
