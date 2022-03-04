@@ -9,7 +9,7 @@ import {
 
 
 import {
-    BaseClientEventListener,
+    IClientEventListener,
     OnErrorListener,
     OnGuildCreateListener,
     OnGuildDeleteListener,
@@ -22,7 +22,7 @@ import { ICommand } from './Command';
 export class BotClient {
     private readonly logger: IDiscordLogger;
     private readonly client: Client;
-    private readonly listeners: BaseClientEventListener<keyof ClientEvents>[] = [];
+    private readonly listeners: IClientEventListener<keyof ClientEvents>[] = [];
     private readonly commands: Map<string, ICommand> = new Map();
     
     private static readonly defaultIntents: BitFieldResolvable<IntentsString, number>[] = [
@@ -30,7 +30,7 @@ export class BotClient {
         Intents.FLAGS.GUILD_MEMBERS,
         Intents.FLAGS.GUILD_MESSAGES
     ];
-    private static readonly defaultListeners: BaseClientEventListener<keyof ClientEvents>[] = [
+    private static readonly defaultListeners: IClientEventListener<keyof ClientEvents>[] = [
         new OnErrorListener(),
         new OnReadyListener(),
         new OnGuildCreateListener(),
@@ -38,7 +38,7 @@ export class BotClient {
     ];
 
     constructor(
-        listeners: BaseClientEventListener<keyof ClientEvents>[] = BotClient.defaultListeners,
+        listeners: IClientEventListener<keyof ClientEvents>[] = BotClient.defaultListeners,
         intents: BitFieldResolvable<IntentsString, number>[] = BotClient.defaultIntents    
     ) {
         this.logger = new DiscordLogger('BotClient.ts');
@@ -51,6 +51,15 @@ export class BotClient {
     }
 
     private async onInteractionCreate(interaction: CommandInteraction) {
+        const command = this.commands.get(interaction.commandName);
+        if (!command) {
+            this.logger.warn(`Received interaction without a command: ${interaction.commandName}`);
+            await interaction.reply({
+                content: 'Whoops! I didn\'t handle that well. Either try again later, or tell the human that maintains me!',
+                ephemeral: true
+            });
+            return;
+        }
         await this.commands.get(interaction.command.name).onInteraction(interaction);
     }
 

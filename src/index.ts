@@ -1,3 +1,5 @@
+export * from 'discord.js';
+
 export * from './BotClient';
 export * from './Logger';
 export * from './Env';
