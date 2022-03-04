@@ -1,6 +1,6 @@
 {
   "name": "@nerdyhick/ts-discord-bot",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0-alpha2",
   "description": "Typescript implementation/classes for a discord slash-command bot",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "build": "npm-run-all lint tsc",
     "tsc": "tsc",
     "lint": "eslint . --ext .ts --fix",
-    "start": "nodemon index.ts"
+    "start": "nodemon test.ts"
   },
   "repository": {
     "type": "git",

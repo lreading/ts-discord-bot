@@ -82,8 +82,6 @@ export class DiscordLogger implements IDiscordLogger {
             level: env.logLevel,
             levels: this.levels,
             transports: [
-                this.getAuditTransport(),
-                this.getAppTransport(),
                 this.getConsoleTransport()
             ]
         });
@@ -106,30 +104,6 @@ export class DiscordLogger implements IDiscordLogger {
             }
         
             return `${timestamp} [${label}] ${level}: ${code}${message}`;
-        });
-    }
-
-    private getFileFormats(): Format {
-        return combine(
-            timestamp(),
-            label({ label: this.fileName }),
-            this.defaultFormat()
-        );
-    }
-
-    private getAuditTransport(): transport {
-        return new transports.File({
-            filename: 'audit.log',
-            format: this.getFileFormats(),
-            maxsize: env.maxLogSize
-        });
-    }
-
-    private getAppTransport(): transport {
-        return new transports.File({
-            filename: 'app.log',
-            level: env.logLevel,
-            maxsize: env.maxLogSize
         });
     }
 
