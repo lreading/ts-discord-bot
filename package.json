@@ -1,6 +1,6 @@
 {
   "name": "@nerdyhick/ts-discord-bot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Typescript implementation/classes for a discord slash-command bot",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@gitlab.leoathome.com:2224/utilities/ts-discord-bot.git"
+    "url": "https://github.com/lreading/ts-discord-bot"
   },
   "author": "Leo Reading",
   "license": "MIT",
