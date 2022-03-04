@@ -1,0 +1,6 @@
+index.js
+*.log
+node_modules
+dist
+example/*
+test.ts
