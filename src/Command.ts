@@ -1,13 +1,4 @@
-import {
-    SlashCommandBooleanOption,
-    SlashCommandBuilder,
-    SlashCommandIntegerOption,
-    SlashCommandNumberOption,
-    SlashCommandRoleOption,
-    SlashCommandStringOption,
-    SlashCommandSubcommandBuilder,
-    SlashCommandUserOption
-} from "@discordjs/builders";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 import {
     ApplicationCommandPermissionData,
@@ -16,37 +7,21 @@ import {
     Guild
 } from "discord.js";
 
-import { BotClient } from "./BotClient";
-import { DiscordLogger } from "./Logger";
+import { BotClient } from './BotClient';
+import { BaseDiscordCommand, IDiscordCommand } from './DiscordCommand';
+import { ISubCommand } from "./SubCommand";
 
-export interface ICommand {
-    readonly name: string;
-    readonly description: string;
-
+export interface ICommand extends IDiscordCommand {
     build(): SlashCommandBuilder;
-    onInteraction(interaction: CommandInteraction): void | Promise<any>;
     getPermissions(guild: Guild): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionData[]>;
 }
 
-export abstract class BaseCommand implements ICommand {
-    readonly name: string;
-    readonly description: string;
-    protected readonly client: BotClient;
-    protected readonly logger: DiscordLogger;
-
-    protected readonly integerOptions: SlashCommandIntegerOption[] = [];
-    protected readonly stringOptions: SlashCommandStringOption[] = [];
-    protected readonly userOptions: SlashCommandUserOption[] = [];
-    protected readonly booleanOptions: SlashCommandBooleanOption[] = [];
-    protected readonly numberOptions: SlashCommandNumberOption[] = [];
-    protected readonly roleOptions: SlashCommandRoleOption[] = [];
-    protected readonly subCommands: SlashCommandSubcommandBuilder[] = [];
+export abstract class BaseCommand extends BaseDiscordCommand implements ICommand {
+    protected readonly subCommands: ISubCommand[] = [];
+    private readonly subCommandMap: Map<string, ISubCommand> = new Map();
 
     constructor(name: string, description: string, client: BotClient) {
-        this.name = name;
-        this.description = description;
-        this.client = client;
-        this.logger = new DiscordLogger(`Commands/${name}`);
+        super(name, description, client);
     }
     
     abstract onInteraction(interaction: CommandInteraction<CacheType>): void | Promise<any>;
@@ -56,15 +31,17 @@ export abstract class BaseCommand implements ICommand {
             .setName(this.name)
             .setDescription(this.description);
         
-        this.integerOptions.forEach((opt) => builder.addIntegerOption(opt));
-        this.stringOptions.forEach((opt) => builder.addStringOption(opt));
-        this.userOptions.forEach((opt) => builder.addUserOption(opt));
-        this.booleanOptions.forEach((opt) => builder.addBooleanOption(opt));
-        this.numberOptions.forEach((opt) => builder.addNumberOption(opt));
-        this.roleOptions.forEach((opt) => builder.addRoleOption(opt));
-        this.subCommands.forEach((cmd) => builder.addSubcommand(cmd));
+        this.addOptions(builder);
+        this.subCommands.forEach((cmd) => {
+            builder.addSubcommand(cmd.build());
+            this.subCommandMap.set(cmd.name, cmd);
+        }, this);
 
         return builder;
+    }
+
+    deferToSubCommand(interaction: CommandInteraction<CacheType>): void | Promise<any> {
+        return this.subCommandMap.get(interaction.options.getSubcommand()).onInteraction(interaction);
     }
 
     //  eslint-disable-next-line @typescript-eslint/no-unused-vars

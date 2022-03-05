@@ -142,6 +142,8 @@ The BaseCommand has properties for different types of command options:
 - NumberOptions
 - RoleOptions
 - SubCommands
+- ChannelOptions
+- MentionableOptions
 
 These are an empty array by default.  If you want to add options to your command, override the properties as appropriate.  
 As an example, we can create a command that says hello to a user:
@@ -163,6 +165,50 @@ class HelloCommand extends BaseCommand {
             .setDescription('the user you want to greet')
             .setRequired(true)
     ];
+}
+```
+
+### SubCommands
+Subcommands follow a similar pattern to commands, and can be added individually to the subCommands array.
+If you'd prefer to handle the command at the parent, make the onInteraction a noOp in the subcommands, otherwise call
+`this.deferToSubCommand(interaction)` from the parent command:
+```ts
+class BanSubCommand extends BaseSubCommand {
+    constructor(client: Botclient) {
+        super('ban', 'Bans the user as well', client);
+    }
+
+    async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
+        await interaction.reply(`Sub command ${this.name} is handling the interaction`);
+    }
+
+    protected override userOptions: SlashCommandUserOption[] = [
+        new SlashCommandUserOption()
+            .setName('user')
+            .setDescription('the user you want to ban')
+            .setRequired(true)
+    ];
+
+    protected override booleanOptions: SlashCommandBooleanOption[] = [
+        new SlashCommandBooleanOption()
+            .setName('permaban')
+            .setDescription('Ban the user forever')
+            .setRequired(true);
+    ];
+}
+
+class ManageCommand extends BaseCommand {
+    constructor(client: BotClient) {
+        super('manage', 'management commands', client);
+    }
+
+    protected override subCommands: ISubCommand[] = [
+        new BanSubCommand(this.client)
+    ];
+
+    async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
+        await this.deferToSubCommand(interaction);
+    }
 }
 ```
 
