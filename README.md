@@ -27,8 +27,8 @@ process.env['DISCORD_APPLICATION_ID'] = 'myawesomeappid';
 process.env['DISCORD_TOKEN'] = 'mysecrettoken'
 
 class PingCommand extends BaseCommand {
-    constructor() {
-        super('ping', 'replies with pong!');
+    constructor(client: BotClient) {
+        super('ping', 'replies with pong!', client);
     }
 
     async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
@@ -37,11 +37,12 @@ class PingCommand extends BaseCommand {
 }
 
 (async () => {
+    const client = new BotClient();
+
     const commands = [
-        new PingCommand()
+        new PingCommand(client)
     ];
 
-    const client = new BotClient();
     await client.start();
     await client.addCommands(commands);
 })();
@@ -49,20 +50,12 @@ class PingCommand extends BaseCommand {
 
 # BotClient
 
-The BotClient class is responsible for creating the client and commands.  You can specify [Discord Intents](https://discord.js.org/#/docs/main/stable/class/Intents?scrollTo=s-FLAGS) and [Client Event](https://discord.js.org/#/docs/main/stable/class/Client) listeners in the constructor.
-If none are specified, the defaults are used.
+The BotClient class is responsible for creating the client and commands.  You can specify [Discord Intents](https://discord.js.org/#/docs/main/stable/class/Intents?scrollTo=s-FLAGS) in the constructor. If none are specified, the defaults are used.
 
 Default Intents:
 - Intents.FLAGS.GUILDS,
 - Intents.FLAGS.GUILD_MEMBERS,
 - Intents.FLAGS.GUILD_MESSAGES
-
-Default Client Event Listeners:
-- Error: Logs a message when there is an error in the client
-- Ready: Logs a message when the client is ready
-- GuildCreate: Logs a message when the bot joins a guild
-- GuildDelete: Logs a message when the bot is removed or kicked from a build
-- InteractionCeate: Delegates to the named command, see the commands section for creating commands
 
 ## Secrets
 
@@ -71,33 +64,41 @@ The BotClient needs to know your discord application id and bot token.  These va
 
 ## Client Event Listeners
 
-To override the default listeners, pass an array of IClientEventListener<T> to the BotClient constructor.
-The type can be any of [Discord's ClientEvents](https://discord.js.org/#/docs/main/stable/class/Client).
-A base implementation is provided that can be easily extended:
+To override the default listeners, use the `setListener(listener: IClientEventListener<T>)` method on the BotClient.  You can override one of the default listeners, or even set the value to null to remove the listener entirely.  You can create a listener for any of [Discord's ClientEvents](https://discord.js.org/#/docs/main/stable/class/Client).
+
+
+Default Client Event Listeners:
+- Error: Logs a message when there is an error in the client
+- Ready: Logs a message when the client is ready
+- GuildCreate: Logs a message when the bot joins a guild
+- GuildDelete: Logs a message when the bot is removed or kicked from a build
+- InteractionCeate: Delegates to the named command, see the commands section for creating commands
+
+A base implementation of the listener is provided that can be easily extended:
 ```ts
-class ThreatCreateEventListener extends BaseClientEventListener<'threadCreate'> {
+class ThreadCreateEventListener extends BaseClientEventListener<'threadCreate'> {
     constructor() {
-        super('threatCreate');
+        super('threadCreate');
     }
 
     public listener = function (thread: ThreadChannel) {
         this.logger.info(thread.id);
     }.bind(this);
 }
-
-const listeners = [ new ThreatCreateEventListener() ];
-const client = new BotClient(listeners);
+const threadCreate = new ThreadCreateEventListener();
+const client = new BotClient();
+client.setListener(threadCreate);
 ```
 
 ## Adding Commands
 
-Commands are the application commands that will be registered and used by the client.  These are registered against all guilds that the bot is part of.
+Commands are the application commands that will be registered and used by the client.  These are registered against all guilds that the bot is part of.  Commands should get an instance of the BotClient so they can refer back to other commands via the `getCommand(name: string)` method (or other helpful features).
 
 To create a new command, extend the BaseCommand class:
 ```ts
 class PingCommand extends BaseCommand {
-    constructor() {
-        super('ping', 'replies with pong!');
+    constructor(client: BotClient) {
+        super('ping', 'replies with pong!', client);
     }
 
     async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
@@ -108,20 +109,20 @@ class PingCommand extends BaseCommand {
 
 ### Command Permissions
 
-You can add specific permissions to commands by overriding the `getPermissions` method in your command.  When this method returns an array with a length >= 1, it will also set the default permission of the command (for that guild) to false.  The Client and Guild objects are passed to this method to allow for guild-specific implementations, as all guilds might not have the same permissions.
+You can add specific permissions to commands by overriding the `getPermissions` method in your command.  When this method returns an array with a length >= 1, it will also set the default permission of the command (for that guild) to false.  The Guild object is passed to this method to allow for guild-specific implementations, as all guilds might not have the same permissions.
 
 As an example, we can restrict access to the Ping command to _only_ the owner of the guild:
 ```ts
 class PingCommand extends BaseCommand {
-    constructor() {
-        super('ping', 'replies with pong!');
+    constructor(client: BotClient) {
+        super('ping', 'replies with pong!', client);
     }
 
     async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
         return await interaction.reply('Pong!');
     }
 
-    override getPermissions(guild: Guild, client: Client): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionsData[]> {
+    override getPermissions(guild: Guild): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionsData[]> {
         const ownerOnly: ApplicationCommandPermissionData = {
             id: guild.ownerId,
             type: 'USER',
@@ -145,8 +146,8 @@ These are an empty array by default.  If you want to add options to your command
 As an example, we can create a command that says hello to a user:
 ```ts
 class HelloCommand extends BaseCommand {
-    constructor() {
-        super('hello', 'says hello to a specific user');
+    constructor(client: BotClient) {
+        super('hello', 'says hello to a specific user', client);
     }
 
     async onInteraction(interaction: CommandInteraction<CacheType>): Promise<any> {
@@ -172,6 +173,7 @@ To run the bot:
 
 ```ts
 const client = new BotClient();
+const commands = [ MyAwesomeCommand(client) ];
 await client.start();
 await client.addCommands(commands);
 ```

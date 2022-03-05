@@ -1,4 +1,5 @@
 import {
+    ApplicationCommand,
     BitFieldResolvable,
     Client,
     ClientEvents,
@@ -22,8 +23,9 @@ import { ICommand } from './Command';
 export class BotClient {
     private readonly logger: IDiscordLogger;
     private readonly client: Client;
-    private readonly listeners: IClientEventListener<keyof ClientEvents>[] = [];
+    private readonly listeners: Map<keyof ClientEvents, IClientEventListener<keyof ClientEvents>> = new Map();
     private readonly commands: Map<string, ICommand> = new Map();
+    private readonly appCommands: Map<string, ApplicationCommand> = new Map();
     
     private static readonly defaultIntents: BitFieldResolvable<IntentsString, number>[] = [
         Intents.FLAGS.GUILDS,
@@ -38,16 +40,11 @@ export class BotClient {
     ];
 
     constructor(
-        listeners: IClientEventListener<keyof ClientEvents>[] = BotClient.defaultListeners,
         intents: BitFieldResolvable<IntentsString, number>[] = BotClient.defaultIntents    
     ) {
         this.logger = new DiscordLogger('BotClient.ts');
-        listeners.forEach((listener) => this.listeners.push(listener), this);
         this.client = new Client({ intents });
-    }
-
-    private addListeners(): void {
-        this.listeners.forEach(listener => this.client.on(listener.name, listener.listener), this);
+        BotClient.defaultListeners.forEach((listener) => this.setListener(listener), this);
     }
 
     private async onInteractionCreate(interaction: CommandInteraction) {
@@ -63,10 +60,16 @@ export class BotClient {
         await this.commands.get(interaction.command.name).onInteraction(interaction);
     }
 
+    private attachListeners(): void {
+        this.listeners.forEach((listener) => {
+            if (listener) this.client.on(listener.name, listener.listener);
+        }, this);
+    }
+
     public async start(): Promise<void> {
         this.logger.info('Starting Discord SlashCommand Bot');
         this.logger.silly('Adding listeners');
-        this.addListeners();
+        this.attachListeners();
         this.client.on('interactionCreate', this.onInteractionCreate.bind(this));
         this.logger.debug('Attempting login');
         await this.client.login(env.token);
@@ -75,13 +78,14 @@ export class BotClient {
     public async addCommand(command: ICommand): Promise<any> {
         this.logger.info(`Adding command ${command.name}`);
         const cmd = await this.client.application.commands.create(command.build().toJSON());
+        this.appCommands.set(cmd.name, cmd);
         this.logger.debug(`Command added as ${cmd.name}`);
 
-        this.logger.info('Fetching guilds...');
+        this.logger.debug('Fetching guilds...');
         const guilds = await this.client.guilds.fetch();
         this.logger.debug(guilds);
         guilds.forEach(async (guild) => {
-            const permissions = await command.getPermissions(await guild.fetch(), this.client);
+            const permissions = await command.getPermissions(await guild.fetch());
             if (permissions.length !== 0) {
                 this.logger.debug(`Assigning permissions for ${command.name} in ${guild.name}`);
                 await cmd.permissions.add({
@@ -97,5 +101,13 @@ export class BotClient {
 
     public async addCommands(commands: ICommand[]): Promise<any> {
         commands.forEach(async (command) => this.addCommand(command), this);
+    }
+
+    public setListener(listener: IClientEventListener<keyof ClientEvents>): void {
+        this.listeners.set(listener.name, listener);
+    }
+
+    public getCommand(name: string): ApplicationCommand {
+        return this.appCommands.get(name) || null;
     }
 }

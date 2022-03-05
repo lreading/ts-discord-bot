@@ -11,10 +11,11 @@ import {
 import {
     ApplicationCommandPermissionData,
     CacheType,
-    Client,
     CommandInteraction,
     Guild
 } from "discord.js";
+
+import { BotClient } from "./BotClient";
 
 export interface ICommand {
     readonly name: string;
@@ -22,12 +23,13 @@ export interface ICommand {
 
     build(): SlashCommandBuilder;
     onInteraction(interaction: CommandInteraction): void | Promise<any>;
-    getPermissions(guild: Guild, client: Client): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionData[]>;
+    getPermissions(guild: Guild): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionData[]>;
 }
 
 export abstract class BaseCommand implements ICommand {
     readonly name: string;
     readonly description: string;
+    private readonly client: BotClient;
 
     protected readonly integerOptions: SlashCommandIntegerOption[] = [];
     protected readonly stringOptions: SlashCommandStringOption[] = [];
@@ -36,9 +38,10 @@ export abstract class BaseCommand implements ICommand {
     protected readonly numberOptions: SlashCommandNumberOption[] = [];
     protected readonly roleOptions: SlashCommandRoleOption[] = [];
 
-    constructor(name: string, description: string) {
+    constructor(name: string, description: string, client: BotClient) {
         this.name = name;
         this.description = description;
+        this.client = client;
     }
     
     abstract onInteraction(interaction: CommandInteraction<CacheType>): void | Promise<any>;
@@ -59,7 +62,7 @@ export abstract class BaseCommand implements ICommand {
     }
 
     //  eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getPermissions(guild: Guild, client: Client): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionData[]> {
+    getPermissions(guild: Guild): ApplicationCommandPermissionData[] | Promise<ApplicationCommandPermissionData[]> {
         return [];
     }
 }
