@@ -3,6 +3,7 @@ import {
     SlashCommandBuilder,
     SlashCommandIntegerOption,
     SlashCommandNumberOption,
+    SlashCommandRoleOption,
     SlashCommandStringOption,
     SlashCommandUserOption
 } from "@discordjs/builders";
@@ -33,6 +34,7 @@ export abstract class BaseCommand implements ICommand {
     protected readonly userOptions: SlashCommandUserOption[] = [];
     protected readonly booleanOptions: SlashCommandBooleanOption[] = [];
     protected readonly numberOptions: SlashCommandNumberOption[] = [];
+    protected readonly roleOptions: SlashCommandRoleOption[] = [];
 
     constructor(name: string, description: string) {
         this.name = name;
@@ -51,6 +53,7 @@ export abstract class BaseCommand implements ICommand {
         this.userOptions.forEach((opt) => builder.addUserOption(opt));
         this.booleanOptions.forEach((opt) => builder.addBooleanOption(opt));
         this.numberOptions.forEach((opt) => builder.addNumberOption(opt));
+        this.roleOptions.forEach((opt) => builder.addRoleOption(opt));
 
         return builder;
     }

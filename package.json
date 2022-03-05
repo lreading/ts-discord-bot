@@ -1,6 +1,6 @@
 {
   "name": "@nerdyhick/ts-discord-bot",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Typescript implementation/classes for a discord slash-command bot",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
