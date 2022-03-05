@@ -16,6 +16,7 @@ import {
 } from "discord.js";
 
 import { BotClient } from "./BotClient";
+import { DiscordLogger } from "./Logger";
 
 export interface ICommand {
     readonly name: string;
@@ -30,6 +31,7 @@ export abstract class BaseCommand implements ICommand {
     readonly name: string;
     readonly description: string;
     protected readonly client: BotClient;
+    protected readonly logger: DiscordLogger;
 
     protected readonly integerOptions: SlashCommandIntegerOption[] = [];
     protected readonly stringOptions: SlashCommandStringOption[] = [];
@@ -42,6 +44,7 @@ export abstract class BaseCommand implements ICommand {
         this.name = name;
         this.description = description;
         this.client = client;
+        this.logger = new DiscordLogger(`Commands/${name}`);
     }
     
     abstract onInteraction(interaction: CommandInteraction<CacheType>): void | Promise<any>;
