@@ -108,7 +108,7 @@ export class BotClient {
         this.listeners.set(listener.name, listener);
     }
 
-    public getCommand(name: string): ApplicationCommand {
+    public getCommand(name: string): ApplicationCommand<{ guild: GuildResolvable}> {
         return this.appCommands.get(name) || null;
     }
 }
