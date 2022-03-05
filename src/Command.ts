@@ -29,7 +29,7 @@ export interface ICommand {
 export abstract class BaseCommand implements ICommand {
     readonly name: string;
     readonly description: string;
-    private readonly client: BotClient;
+    protected readonly client: BotClient;
 
     protected readonly integerOptions: SlashCommandIntegerOption[] = [];
     protected readonly stringOptions: SlashCommandStringOption[] = [];
