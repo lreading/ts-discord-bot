@@ -141,6 +141,7 @@ The BaseCommand has properties for different types of command options:
 - BooleanOptions
 - NumberOptions
 - RoleOptions
+- SubCommands
 
 These are an empty array by default.  If you want to add options to your command, override the properties as appropriate.  
 As an example, we can create a command that says hello to a user:
