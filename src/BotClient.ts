@@ -4,6 +4,7 @@ import {
     Client,
     ClientEvents,
     CommandInteraction,
+    GuildResolvable,
     Intents,
     IntentsString
 } from 'discord.js';
@@ -25,7 +26,7 @@ export class BotClient {
     private readonly client: Client;
     private readonly listeners: Map<keyof ClientEvents, IClientEventListener<keyof ClientEvents>> = new Map();
     private readonly commands: Map<string, ICommand> = new Map();
-    private readonly appCommands: Map<string, ApplicationCommand> = new Map();
+    private readonly appCommands: Map<string, ApplicationCommand<{ guild: GuildResolvable }>> = new Map();
     
     private static readonly defaultIntents: BitFieldResolvable<IntentsString, number>[] = [
         Intents.FLAGS.GUILDS,
